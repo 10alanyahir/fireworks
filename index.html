@@ -1,0 +1,206 @@
+body {
+    margin: 0;
+    overflow: hidden;
+    background: black;
+    font-family: Arial, sans-serif;
+}
+
+/* Contenedor del texto */
+#message {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    color: white;
+    font-size: 3rem;
+    transform: translate(-50%, -50%);
+    text-shadow: 0 0 20px #fff;
+    white-space: nowrap;
+}
+
+/* Contenedor globos */
+#balloons-container {
+    position: fixed;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 20px;
+    pointer-events: none;
+}
+
+/* Globos */
+.balloon {
+    width: 50px;
+    height: 70px;
+    border-radius: 50%;
+    opacity: 0.9;
+    animation: floatUp 6s infinite ease-in-out;
+    position: relative;
+}
+
+/* cuerda globo */
+.balloon::after {
+    content: "";
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    width: 2px;
+    height: 20px;
+    background: white;
+    transform: translateX(-50%);
+}
+
+/* Animación globos */
+@keyframes floatUp {
+    0% { transform: translateY(0px) }
+    50% { transform: translateY(-20px) }
+    100% { transform: translateY(0px) }
+}
+
+
+// MÚSICA DE FONDO
+const music = document.getElementById("music");
+
+// volumen inicial
+music.volume = 0.5;
+
+// activar música con primer clic o toque
+document.addEventListener("click", () => {
+    if (music.paused) {
+        music.play();
+    }
+});
+
+// =========================
+// CONFIGURACIÓN TEXTO
+// =========================
+const message ="FELICIDADES CHAMAQUITA TQM";
+let index = 0;
+const speed = 200; // velocidad entre letras
+
+const messageDiv = document.getElementById("message");
+
+// Mostrar texto letra por letra
+function showMessage() {
+    if (index < message.length) {
+        messageDiv.innerHTML += message[index];
+        index++;
+        setTimeout(showMessage, speed);
+    }
+}
+
+showMessage();
+
+
+// =========================
+// CREAR GLOBOS
+// =========================
+function createBalloons() {
+
+    const container = document.getElementById("balloons-container");
+
+    const colors = ["red", "blue", "yellow", "green", "purple"];
+
+    for (let i = 0; i < 5; i++) {
+
+        let balloon = document.createElement("div");
+        balloon.className = "balloon";
+
+        balloon.style.background = `
+            radial-gradient(circle at 30% 30%, rgba(255,255,255,0.6), ${colors[i]})
+        `;
+
+        container.appendChild(balloon);
+    }
+}
+
+createBalloons();
+
+
+// =========================
+// FUEGOS ARTIFICIALES
+// =========================
+
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+canvas.width = innerWidth;
+canvas.height = innerHeight;
+
+let particles = [];
+
+class Particle {
+    constructor(x, y, color) {
+        this.x = x;
+        this.y = y;
+        this.color = color;
+        this.radius = Math.random() * 3 + 1;
+        this.speedX = (Math.random() - 0.5) * 4;
+        this.speedY = (Math.random() - 0.5) * 4;
+        this.alpha = 1;
+    }
+
+    update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        this.alpha -= 0.01;
+    }
+
+    draw() {
+        ctx.globalAlpha = this.alpha;
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
+function explode() {
+    const x = Math.random() * canvas.width;
+    const y = Math.random() * canvas.height / 2;
+
+    const colors = ["red", "blue", "yellow", "purple", "green", "white"];
+
+    for (let i = 0; i < 50; i++) {
+        particles.push(new Particle(x, y, colors[Math.floor(Math.random() * colors.length)]));
+    }
+}
+
+function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    particles.forEach((p, i) => {
+        p.update();
+        p.draw();
+
+        if (p.alpha <= 0) {
+            particles.splice(i, 1);
+        }
+    });
+
+    if (Math.random() < 0.05) {
+        explode();
+    }
+
+    requestAnimationFrame(animate);
+}
+
+animate();
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fuegos + Globos + Texto</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <audio id="music" src="musica.mp3.mp3" loop></audio>
+    <div id="balloons-container"></div>
+    <canvas id="canvas"></canvas>
+    <div id="message"></div>
+
+    <script src="fireworks.js"></script>
+
+</body>
+</html>
